@@ -31,17 +31,47 @@ function getProfileCompletion(user) {
 }
 
 const JobDescription = () => {
-    const {singleJob} = useSelector(store => store.job);
-    const {user} = useSelector(store=>store.auth);
-    const [isApplied, setIsApplied] = useState(false);
-    const [isMarkedApplied, setIsMarkedApplied] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const { user } = useSelector(store => store.auth);
+    const [job, setJob] = useState(null);
     const [error, setError] = useState(null);
-
+    const [loading, setLoading] = useState(true);
     const params = useParams();
     const jobId = params.id;
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    // Always clear Redux job state on mount
+    useEffect(() => { dispatch(setSingleJob(null)); }, [dispatch]);
+
+    useEffect(() => {
+        setLoading(true);
+        setError(null);
+        setJob(null);
+        axios.get(`${JOB_API_END_POINT}/get/${jobId}`)
+            .then(res => {
+                if (res.data.success && res.data.job) {
+                    setJob(res.data.job);
+                    dispatch(setSingleJob(res.data.job));
+                } else {
+                    setError('expired');
+                }
+            })
+            .catch(() => setError('expired'))
+            .finally(() => setLoading(false));
+    }, [jobId, dispatch]);
+
+    useEffect(() => {
+        if (error === 'expired') {
+            const timer = setTimeout(() => {
+                if (!user) navigate('/login');
+                else navigate('/');
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [error, user, navigate]);
+
+    const [isApplied, setIsApplied] = useState(false);
+    const [isMarkedApplied, setIsMarkedApplied] = useState(false);
 
     // Profile completion logic
     const completion = getProfileCompletion(user);
@@ -49,18 +79,18 @@ const JobDescription = () => {
 
     // Check if user has applied to this job (for internal applications)
     useEffect(() => {
-        if (singleJob && user && singleJob.applicationType === 'internal') {
-            const hasApplied = singleJob.applications?.some(application => application.applicant === user._id);
+        if (job && user && job.applicationType === 'internal') {
+            const hasApplied = job.applications?.some(application => application.applicant === user._id);
             setIsApplied(hasApplied);
         }
-    }, [singleJob, user]);
+    }, [job, user]);
 
     // Check if user has marked this job as applied (for external applications)
     useEffect(() => {
-        if (singleJob && user && singleJob.applicationType === 'external') {
+        if (job && user && job.applicationType === 'external') {
             checkIfMarkedApplied();
         }
-    }, [singleJob, user]);
+    }, [job, user]);
 
     const checkIfMarkedApplied = async () => {
         try {
@@ -76,16 +106,16 @@ const JobDescription = () => {
     };
 
     const applyJobHandler = async () => {
-        if (singleJob.applicationType === 'internal') {
+        if (job.applicationType === 'internal') {
             // Internal application
             try {
                 const res = await axios.get(`${APPLICATION_API_END_POINT}/apply/${jobId}`, {withCredentials:true});
                 
                 if(res.data.success){
                     setIsApplied(true);
-                    const updatedSingleJob = {...singleJob, applications:[...singleJob.applications,{applicant:user?._id}]}
-                    dispatch(setSingleJob(updatedSingleJob));
-                    dispatch(updateJobInList(updatedSingleJob));
+                    const updatedJob = {...job, applications:[...job.applications,{applicant:user?._id}]}
+                    dispatch(setSingleJob(updatedJob));
+                    dispatch(updateJobInList(updatedJob));
                     toast.success(res.data.message);
                 }
             } catch (error) {
@@ -94,8 +124,8 @@ const JobDescription = () => {
             }
         } else {
             // External application
-            if (singleJob.careerPageUrl) {
-                window.open(singleJob.careerPageUrl, '_blank');
+            if (job.careerPageUrl) {
+                window.open(job.careerPageUrl, '_blank');
                 await markAsApplied();
             } else {
                 toast.error("Career page URL not available");
@@ -112,8 +142,8 @@ const JobDescription = () => {
             if (res.data.success) {
                 setIsMarkedApplied(true);
                 // Update the job in the global jobs list for external jobs
-                const updatedSingleJob = { ...singleJob, markedApplied: true };
-                dispatch(updateJobInList(updatedSingleJob));
+                const updatedJob = { ...job, markedApplied: true };
+                dispatch(updateJobInList(updatedJob));
                 toast.success("Job marked as applied!");
             }
         } catch (error) {
@@ -135,7 +165,7 @@ const JobDescription = () => {
     };
 
     const getApplyButton = () => {
-        if (!singleJob) return null;
+        if (!job) return null;
         if (!user) {
             return (
                 <Button
@@ -158,7 +188,7 @@ const JobDescription = () => {
                 </Button>
             );
         }
-        if (singleJob.applicationType === 'internal') {
+        if (job.applicationType === 'internal') {
             if (isApplied) {
                 return (
                     <Button disabled className="bg-gray-600 cursor-not-allowed">
@@ -210,8 +240,8 @@ const JobDescription = () => {
         const url = window.location.origin + '/description/' + jobId;
         if (navigator.share) {
             navigator.share({
-                title: singleJob?.title,
-                text: `Check out this job: ${singleJob?.title} at ${singleJob?.company?.name || ''}`,
+                title: job?.title,
+                text: `Check out this job: ${job?.title} at ${job?.company?.name || ''}`,
                 url,
             });
         } else {
@@ -220,52 +250,18 @@ const JobDescription = () => {
         }
     };
 
-    useEffect(()=>{
-        const fetchSingleJob = async () => {
-            try {
-                const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`);
-                if(res.data.success){
-                    dispatch(setSingleJob(res.data.job));
-                    setError(null);
-                } else {
-                    setError('expired');
-                }
-            } catch (error) {
-                setError('expired');
-            }
-        }
-        fetchSingleJob(); 
-    },[jobId,dispatch]);
-
-    // Redirect logic if job not found
-    useEffect(() => {
-        if (error === 'expired') {
-            const timer = setTimeout(() => {
-                if (!user) {
-                    navigate('/login');
-                } else {
-                    navigate('/');
-                }
-            }, 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [error, user, navigate]);
-
+    if (loading) return <div className="text-center py-10">Loading job details...</div>;
     if (error === 'expired') {
         return (
             <div className="text-center py-10">
                 <h2 className="text-2xl font-bold text-red-600 mb-4">Job expired or not found</h2>
                 <p className="mb-4">This job is no longer available. Redirecting you to {user ? 'Home' : 'Login'}...</p>
                 <h3 className="text-lg font-semibold mb-2">Explore similar jobs:</h3>
-                {/* Suggest similar jobs (basic version: link to jobs page) */}
                 <a href="/jobs" className="text-blue-600 underline">Browse Jobs</a>
             </div>
         );
     }
 
-    if (!singleJob) {
-        return <div className="text-center py-10">Loading job details...</div>;
-    }
     return (
         <div>
             <Navbar />
@@ -273,17 +269,17 @@ const JobDescription = () => {
                 <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6'>
                     <div>
                         <div className="flex gap-2 items-center mb-4">
-                            <h1 className="text-3xl font-bold text-blue-900 flex-1">{singleJob?.title}</h1>
+                            <h1 className="text-3xl font-bold text-blue-900 flex-1">{job?.title}</h1>
                             <Button onClick={handleShare} variant="outline" className="flex items-center gap-1 border-blue-200 text-blue-600 hover:bg-blue-50">
                                 <Share2 className="w-5 h-5" /> Share
                             </Button>
                         </div>
-                        {singleJob?.company && (
+                        {job?.company && (
                             <div className='flex items-center gap-2 mb-1'>
-                                <span className='text-lg text-gray-600 font-semibold'>{singleJob.company.name}</span>
-                                {singleJob.company.website && (
+                                <span className='text-lg text-gray-600 font-semibold'>{job.company.name}</span>
+                                {job.company.website && (
                                     <a
-                                        href={singleJob.company.website.startsWith('http') ? singleJob.company.website : `https://${singleJob.company.website}`}
+                                        href={job.company.website.startsWith('http') ? job.company.website : `https://${job.company.website}`}
                                         target='_blank'
                                         rel='noopener noreferrer'
                                         className='text-blue-600 hover:underline text-sm ml-2'
@@ -295,30 +291,30 @@ const JobDescription = () => {
                         )}
                         <div className='flex flex-wrap items-center gap-2 mt-2'>
                             <Badge className={'text-blue-700 font-bold'} variant="ghost">
-                                {singleJob?.position && singleJob.position !== "Not Disclosed" ? `${singleJob.position} Positions` : 'Not Disclosed'}
+                                {job?.position && job.position !== "Not Disclosed" ? `${job.position} Positions` : 'Not Disclosed'}
                             </Badge>
-                            <Badge className={'text-[#F83002] font-bold'} variant="ghost">{singleJob?.jobType}</Badge>
+                            <Badge className={'text-[#F83002] font-bold'} variant="ghost">{job?.jobType}</Badge>
                             <Badge className={'text-[#7209b7] font-bold'} variant="ghost">
-                                {singleJob?.salary && singleJob.salary !== "Not Disclosed" ? `${singleJob.salary} LPA` : 'Not Disclosed'}
+                                {job?.salary && job.salary !== "Not Disclosed" ? `${job.salary} LPA` : 'Not Disclosed'}
                             </Badge>
-                            {singleJob?.applicationType === 'external' && (
+                            {job?.applicationType === 'external' && (
                                 <Badge className={'text-green-700 font-bold'} variant="ghost">External Application</Badge>
                             )}
-                            {singleJob?.status && (
-                                <Badge className={singleJob.status === 'open' ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'} variant="default">
-                                    {singleJob.status.charAt(0).toUpperCase() + singleJob.status.slice(1)}
+                            {job?.status && (
+                                <Badge className={job.status === 'open' ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'} variant="default">
+                                    {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
                                 </Badge>
                             )}
-                            {singleJob?.expiryDate && (
+                            {job?.expiryDate && (
                                 <Badge className='bg-gray-200 text-gray-700' variant="ghost">
-                                    Expires: {new Date(singleJob.expiryDate).toLocaleDateString()}
+                                    Expires: {new Date(job.expiryDate).toLocaleDateString()}
                                 </Badge>
                             )}
                         </div>
                     </div>
                     <div className='flex flex-col items-end gap-2'>
                         {getApplyButton()}
-                        {user && singleJob && user._id === singleJob.created_by && (
+                        {user && job && user._id === job.created_by && (
                             <Button
                                 variant="destructive"
                                 className="mt-2"
@@ -332,22 +328,22 @@ const JobDescription = () => {
                 <div className='border-b border-gray-200 mb-6'></div>
                 <h2 className='font-semibold text-lg text-gray-800 mb-2'>Job Description</h2>
                 <div className='mb-6'>
-                    <p className='text-gray-700 leading-relaxed'>{singleJob?.description}</p>
+                    <p className='text-gray-700 leading-relaxed'>{job?.description}</p>
                 </div>
                 <h2 className='font-semibold text-lg text-gray-800 mb-2'>Requirements</h2>
                 <div className='mb-6'>
                     <ul className='list-disc list-inside space-y-2'>
-                        {singleJob?.requirements?.map((requirement, index) => (
+                        {job?.requirements?.map((requirement, index) => (
                             <li key={index} className='text-gray-700'>{requirement}</li>
                         ))}
                     </ul>
                 </div>
-                {singleJob?.applicationType === 'external' && singleJob?.careerPageUrl && (
+                {job?.applicationType === 'external' && job?.careerPageUrl && (
                     <div className='my-5 p-4 bg-blue-50 rounded-lg'>
                         <h2 className='font-semibold text-blue-800 mb-2'>External Application</h2>
                         <p className='text-blue-700 mb-3'>This job requires you to apply on the company's website.</p>
                         <a 
-                            href={singleJob.careerPageUrl} 
+                            href={job.careerPageUrl} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className='text-blue-600 hover:underline font-medium'
