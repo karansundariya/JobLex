@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { toast } from 'sonner'
 import { setShowProfileDialog } from '@/redux/authSlice'
 
+// LatestJobCards component logic updated
 const LatestJobCards = ({job}) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();

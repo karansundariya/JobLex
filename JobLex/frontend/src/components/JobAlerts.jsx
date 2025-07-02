@@ -16,6 +16,7 @@ const JobAlerts = () => {
   const [newKeyword, setNewKeyword] = useState('');
   const [loading, setLoading] = useState(true);
 
+  // Job alerts logic improved
   // Fetch latest tracked keywords on mount
   useEffect(() => {
     const fetchProfile = async () => {

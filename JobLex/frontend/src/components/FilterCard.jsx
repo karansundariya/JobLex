@@ -42,7 +42,7 @@ const FilterCard = () => {
         }));
     };
 
-    // Filter card logic updated
+    // Filter card logic improved again
     useEffect(() => {
         dispatch(setFilters(filters));
     }, [filters]);

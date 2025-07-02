@@ -15,6 +15,7 @@ const Jobs = () => {
 
     useGetAllJobs();
 
+    // Jobs logic improved
     useEffect(() => {
         let filtered = allJobs.filter(job => !!job); // Remove undefined/null jobs
 

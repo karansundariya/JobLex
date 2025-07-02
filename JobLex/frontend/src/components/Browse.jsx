@@ -9,6 +9,7 @@ import { Button } from './ui/button';
 import { Search } from 'lucide-react';
 import Fuse from 'fuse.js';
 
+// Browse component logic updated
 const Browse = () => {
     useGetAllJobs();
     const { allJobs, filters } = useSelector(store => store.job);
