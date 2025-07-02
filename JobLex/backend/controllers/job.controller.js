@@ -2,6 +2,7 @@ const { Job } = require("../models/job.model.js");
 const { User } = require("../models/user.model.js");
 const sendEmail = require("../utils/email.js");
 const { Company } = require("../models/company.model.js");
+const { setImmediate } = require('timers');
 
 // Job controller logic updated
 
@@ -59,22 +60,26 @@ const postJob = async (req, res) => {
         // Notify users tracking keywords
         const keywordRegex = new RegExp(job.title + '|' + job.description, 'i');
         const usersToNotify = await User.find({ trackedKeywords: { $exists: true, $ne: [] } });
-        for (const user of usersToNotify) {
-            if (user.trackedKeywords.some(keyword => job.title.toLowerCase().includes(keyword.toLowerCase()) || job.description.toLowerCase().includes(keyword.toLowerCase()))) {
-                try {
-                    await sendEmail(
-                        user.email,
-                        `New Job Alert: ${job.title}`,
-                        `Hi ${user.fullname || 'there'},\n\nA new job matching your interest ('${user.trackedKeywords.join(", ")}') has been posted!\n\nJob Title: ${job.title}\nCompany: ${companyName}\nLocation: ${companyLocation}\nDescription: ${job.description}\n\nView & Apply: https://joblex-vo9q.onrender.com/description/${job._id}\n\nBest of luck!\nTeam JobLex`
-                    );
-                } catch (e) { /* ignore email errors */ }
-            }
-        }
 
         return res.status(201).json({
             message: "New job created successfully.",
             job,
             success: true
+        });
+
+        // Send emails in the background
+        setImmediate(async () => {
+            for (const user of usersToNotify) {
+                if (user.trackedKeywords.some(keyword => job.title.toLowerCase().includes(keyword.toLowerCase()) || job.description.toLowerCase().includes(keyword.toLowerCase()))) {
+                    try {
+                        await sendEmail(
+                            user.email,
+                            `New Job Alert: ${job.title}`,
+                            `Hi ${user.fullname || 'there'},\n\nA new job matching your interest ('${user.trackedKeywords.join(", ")}') has been posted!\n\nJob Title: ${job.title}\nCompany: ${companyName}\nLocation: ${companyLocation}\nDescription: ${job.description}\n\nView & Apply: https://joblex-vo9q.onrender.com/description/${job._id}\n\nBest of luck!\nTeam JobLex`
+                        );
+                    } catch (e) { /* ignore email errors */ }
+                }
+            }
         });
     } catch (error) {
         console.log(error);
