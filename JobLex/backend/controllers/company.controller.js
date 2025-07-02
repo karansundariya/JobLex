@@ -2,6 +2,8 @@ const { Company } = require("../models/company.model.js");
 const getDataUri = require("../utils/datauri.js");
 const cloudinary = require("../utils/cloudinary.js");
 
+// Company controller logic updated
+
 const registerCompany = async (req, res) => {
     try {
         const { companyName } = req.body;

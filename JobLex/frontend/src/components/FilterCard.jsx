@@ -42,6 +42,7 @@ const FilterCard = () => {
         }));
     };
 
+    // Filter card logic updated
     useEffect(() => {
         dispatch(setFilters(filters));
     }, [filters]);

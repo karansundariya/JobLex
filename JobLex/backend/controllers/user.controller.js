@@ -19,6 +19,7 @@ const uploadToCloudinary = (fileBuffer) => {
     });
 };
 
+// Register new user logic updated for clarity
 const register = async (req, res) => {
     try {
         const { fullname, email, phoneNumber, password, role } = req.body;

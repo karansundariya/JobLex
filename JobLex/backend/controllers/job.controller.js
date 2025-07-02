@@ -3,6 +3,8 @@ const { User } = require("../models/user.model.js");
 const sendEmail = require("../utils/email.js");
 const { Company } = require("../models/company.model.js");
 
+// Job controller logic updated
+
 // admin post krega job
 const postJob = async (req, res) => {
     try {

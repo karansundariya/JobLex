@@ -11,6 +11,7 @@ import CategoryQuickLinks from './CategoryQuickLinks'
 import FeaturedCompaniesCarousel from './FeaturedCompaniesCarousel'
 import WhyJobLexSection from './WhyJobLexSection'
 
+// Home page main component logic updated
 const Home = () => {
   useGetAllJobs();
   const { user } = useSelector(store => store.auth);

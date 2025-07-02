@@ -5,6 +5,7 @@ import { JobCard } from './Job';
 import useGetAppliedJobs from '@/hooks/useGetAppliedJobs';
 
 const AppliedJobs = () => {
+    // Applied jobs fetching logic updated
     useGetAppliedJobs();
     const { allAppliedJobs } = useSelector(store => store.job);
 

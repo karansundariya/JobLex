@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { setShowProfileDialog } from '@/redux/authSlice'
 import { Share2 } from 'lucide-react'
 
+// Job component logic updated
 const Job = ({ job, showSavedBadge = true, forceApplied = false, forceCheckApplied = false }) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();

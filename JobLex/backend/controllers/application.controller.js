@@ -2,6 +2,7 @@ const { Application } = require("../models/application.model.js");
 const { Job } = require("../models/job.model.js");
 const { User } = require("../models/user.model.js");
 
+// Application submission logic updated
 const applyJob = async (req, res) => {
     try {
         const userId = req.id;
