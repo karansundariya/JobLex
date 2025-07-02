@@ -18,6 +18,9 @@ import SavedJobs from './components/SavedJobs'
 import AppliedJobs from './components/AppliedJobs'
 import HowWeWork from './components/HowWeWork'
 import JobAlerts from './components/JobAlerts'
+import ResumeParsing from './components/ResumeParsing'
+import JobRecommendation from './components/JobRecommendation'
+import InterviewPrep from './components/InterviewPrep'
 
 
 const appRouter = createBrowserRouter([
@@ -89,6 +92,18 @@ const appRouter = createBrowserRouter([
   {
     path: '/job-alerts',
     element: <JobAlerts />
+  },
+  {
+    path: '/resume-parsing',
+    element: <ResumeParsing />
+  },
+  {
+    path: '/job-recommendation',
+    element: <JobRecommendation />
+  },
+  {
+    path: '/interview-prep',
+    element: <InterviewPrep />
   },
 ])
 function App() {

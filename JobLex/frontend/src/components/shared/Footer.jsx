@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { USER_API_END_POINT } from '../../utils/constant';
+import { useSelector } from 'react-redux';
 
 const Footer = () => {
   const [stats, setStats] = useState({ totalUsers: 0 });
+  const user = useSelector(state => state.auth.user);
   useEffect(() => {
     fetch(`${USER_API_END_POINT}/stats`)
       .then(res => res.json())
@@ -37,6 +39,13 @@ const Footer = () => {
             <p className="text-sm text-blue-900">© 2025 JobLex. All rights reserved.</p>
             <p className="text-xs text-blue-600 mt-1">Empowering your career journey.</p>
             <p className="text-xs text-blue-500 mt-2 italic">Find your dream job, faster.</p>
+            {user?.role === 'student' && (
+              <div className="mt-4 flex flex-col items-center gap-2">
+                <a href="/resume-parsing" className="text-blue-600 hover:underline">AI Resume Parsing (Coming Soon)</a>
+                <a href="/job-recommendation" className="text-blue-600 hover:underline">Job Recommendation (Coming Soon)</a>
+                <a href="/interview-prep" className="text-blue-600 hover:underline">Interview Prep (Coming Soon)</a>
+              </div>
+            )}
           </div>
           <div className="flex flex-col items-center gap-2">
             <a href="https://www.linkedin.com/in/karan-sundariya/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 group hover:bg-blue-100 px-3 py-1 rounded-lg transition">
