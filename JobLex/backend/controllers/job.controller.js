@@ -65,7 +65,7 @@ const postJob = async (req, res) => {
                     await sendEmail(
                         user.email,
                         `New Job Alert: ${job.title}`,
-                        `A new job matching your interest ('${user.trackedKeywords.join(", ")}') has been posted: ${job.title}\n\nCompany: ${companyName}\nLocation: ${companyLocation}\nDescription: ${job.description}\n\nVisit the portal to apply!`
+                        `Hi ${user.fullname || 'there'},\n\nA new job matching your interest ('${user.trackedKeywords.join(", ")}') has been posted!\n\nJob Title: ${job.title}\nCompany: ${companyName}\nLocation: ${companyLocation}\nDescription: ${job.description}\n\nView & Apply: https://joblex-vo9q.onrender.com/description/${job._id}\n\nBest of luck!\nTeam JobLex`
                     );
                 } catch (e) { /* ignore email errors */ }
             }
