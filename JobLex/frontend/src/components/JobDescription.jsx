@@ -36,6 +36,7 @@ const JobDescription = () => {
     const [isApplied, setIsApplied] = useState(false);
     const [isMarkedApplied, setIsMarkedApplied] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const params = useParams();
     const jobId = params.id;
@@ -222,16 +223,45 @@ const JobDescription = () => {
     useEffect(()=>{
         const fetchSingleJob = async () => {
             try {
-                const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`,{withCredentials:true});
+                const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`);
                 if(res.data.success){
                     dispatch(setSingleJob(res.data.job));
+                    setError(null);
+                } else {
+                    setError('expired');
                 }
             } catch (error) {
-                console.log(error);
+                setError('expired');
             }
         }
         fetchSingleJob(); 
     },[jobId,dispatch]);
+
+    // Redirect logic if job not found
+    useEffect(() => {
+        if (error === 'expired') {
+            const timer = setTimeout(() => {
+                if (!user) {
+                    navigate('/login');
+                } else {
+                    navigate('/');
+                }
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [error, user, navigate]);
+
+    if (error === 'expired') {
+        return (
+            <div className="text-center py-10">
+                <h2 className="text-2xl font-bold text-red-600 mb-4">Job expired or not found</h2>
+                <p className="mb-4">This job is no longer available. Redirecting you to {user ? 'Home' : 'Login'}...</p>
+                <h3 className="text-lg font-semibold mb-2">Explore similar jobs:</h3>
+                {/* Suggest similar jobs (basic version: link to jobs page) */}
+                <a href="/jobs" className="text-blue-600 underline">Browse Jobs</a>
+            </div>
+        );
+    }
 
     if (!singleJob) {
         return <div className="text-center py-10">Loading job details...</div>;
