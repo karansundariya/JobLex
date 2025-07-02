@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { USER_API_END_POINT } from '../../utils/constant';
 
 const Footer = () => {
   const [stats, setStats] = useState({ totalUsers: 0 });
   useEffect(() => {
-    fetch('http://localhost:3000/api/v1/user/stats')
+    fetch(`${USER_API_END_POINT}/stats`)
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(() => {});
