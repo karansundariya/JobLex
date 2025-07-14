@@ -1,4 +1,4 @@
-# JobLex
+JobLex is a modern, mobile-first campus recruitment platform connecting students, recruiters, and institutions for seamless early-career hiring.
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit-blue?style=for-the-badge)](https://joblex-vo9q.onrender.com/)
 
