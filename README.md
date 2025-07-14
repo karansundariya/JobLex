@@ -207,4 +207,4 @@ JobLex/
 
 **JobLex: Shaping the future of campus recruitment, one hire at a time.**
 
-Made with ❤️  | Proudly Indian 🇮🇳 
+Made with ❤️  | Proudly Indian 🇮🇳  
