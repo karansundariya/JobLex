@@ -176,67 +176,70 @@ const Job = ({ job, showSavedBadge = true, forceApplied = false, forceCheckAppli
 
     return (
         <div 
-            className='bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow duration-200 relative flex flex-col min-h-[260px] w-full max-w-full overflow-hidden'
+            className='bg-white border border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-lg transition-shadow duration-200 relative flex flex-col min-h-[280px] sm:min-h-[260px] w-full max-w-full overflow-hidden'
         >
             {showSavedBadge && isSaved && (
-                <Badge className='bg-yellow-400 text-black font-bold absolute top-3 right-3 z-10' variant="default">Saved</Badge>
+                <Badge className='bg-yellow-400 text-black font-bold absolute top-2 sm:top-3 right-2 sm:right-3 z-10 text-xs sm:text-sm' variant="default">Saved</Badge>
             )}
+            
             <div className='flex-1'>
-                <h1 className='font-extrabold text-xl mb-1 text-gray-900'>{job?.title}</h1>
+                <h1 className='font-extrabold text-lg sm:text-xl mb-1 text-gray-900 line-clamp-2'>{job?.title}</h1>
                 {job?.company && job.company.name && (
-                  <div className='text-sm text-gray-500 font-medium mb-1'>
+                  <div className='text-sm text-gray-500 font-medium mb-2'>
                     {job.company.name}
                   </div>
                 )}
-                <p className='text-base text-gray-600 line-clamp-3'>{job?.description}</p>
+                <p className='text-sm sm:text-base text-gray-600 line-clamp-3 leading-relaxed'>{job?.description}</p>
             </div>
-            <div className='flex flex-wrap items-center gap-2 mt-4'>
-                <Badge className={'text-blue-700 bg-blue-50 font-semibold'} variant="ghost">
+            
+            <div className='flex flex-wrap items-center gap-1 sm:gap-2 mt-3 sm:mt-4'>
+                <Badge className={'text-blue-700 bg-blue-50 font-semibold text-xs sm:text-sm'} variant="ghost">
                     {job?.position && job.position !== "Not Disclosed" ? `${job.position} Positions` : 'Not Disclosed'}
                 </Badge>
-                <Badge className={'text-gray-700 bg-gray-100 font-semibold'} variant="ghost">{job?.jobType}</Badge>
-                <Badge className={'text-purple-700 bg-purple-50 font-semibold'} variant="ghost">
+                <Badge className={'text-gray-700 bg-gray-100 font-semibold text-xs sm:text-sm'} variant="ghost">{job?.jobType}</Badge>
+                <Badge className={'text-purple-700 bg-purple-50 font-semibold text-xs sm:text-sm'} variant="ghost">
                     {job?.salary && job.salary !== "Not Disclosed" ? `${job.salary} LPA` : 'Not Disclosed'}
                 </Badge>
                 {job?.applicationType === 'external' && (
-                    <Badge className={'text-green-700 bg-green-50 font-semibold'} variant="ghost">External</Badge>
+                    <Badge className={'text-green-700 bg-green-50 font-semibold text-xs sm:text-sm'} variant="ghost">External</Badge>
                 )}
                 {job?.status && (
-                    <Badge className={job.status === 'open' ? 'bg-green-500 text-white' : 'bg-gray-400 text-white'} variant="default">
+                    <Badge className={job.status === 'open' ? 'bg-green-500 text-white text-xs sm:text-sm' : 'bg-gray-400 text-white text-xs sm:text-sm'} variant="default">
                         {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
                     </Badge>
                 )}
                 {job?.expiryDate && (
-                    <Badge className='bg-gray-200 text-gray-700 max-w-[160px] truncate' variant="ghost">
+                    <Badge className='bg-gray-200 text-gray-700 max-w-[140px] sm:max-w-[160px] truncate text-xs sm:text-sm' variant="ghost">
                         Expires: {new Date(job.expiryDate).toLocaleDateString()}
                     </Badge>
                 )}
             </div>
-            <div className='flex flex-row flex-wrap items-center gap-3 mt-6 w-full'>
+            
+            <div className='flex flex-col sm:flex-row flex-wrap items-center gap-2 sm:gap-3 mt-4 sm:mt-6 w-full'>
                 <Button
                     key={String(isApplied) + '-' + String(isMarkedApplied)}
                     variant="outline"
                     className={
                         !isProfileComplete
-                            ? 'border-red-500 text-red-600 bg-red-50 font-semibold cursor-not-allowed opacity-70'
+                            ? 'border-red-500 text-red-600 bg-red-50 font-semibold cursor-not-allowed opacity-70 w-full sm:w-auto min-h-[44px]'
                             : hasUserApplied()
-                                ? 'bg-green-600 text-white border-green-600 hover:bg-green-700'
-                                : 'border-blue-600 text-blue-600 hover:bg-blue-50'
+                                ? 'bg-green-600 text-white border-green-600 hover:bg-green-700 w-full sm:w-auto min-h-[44px]'
+                                : 'border-blue-600 text-blue-600 hover:bg-blue-50 w-full sm:w-auto min-h-[44px]'
                     }
-                    style={{ minWidth: 120 }}
                     onClick={handleDetailsClick}
                     title={!user ? 'Login required' : !isProfileComplete ? 'Complete your profile to apply for jobs' : hasUserApplied() ? 'Already Applied' : 'View job details'}
                     disabled={false}
                 >
                     {!user ? 'Login to View' : !isProfileComplete ? 'Complete Profile to Apply' : hasUserApplied() ? 'Already Applied' : 'Details'}
                 </Button>
+                
                 <Button
                     className={
                         !isProfileComplete
-                            ? 'bg-gray-200 text-gray-400 font-semibold cursor-not-allowed opacity-70 min-w-[140px]'
+                            ? 'bg-gray-200 text-gray-400 font-semibold cursor-not-allowed opacity-70 w-full sm:w-auto min-h-[44px]'
                             : isSaved
-                                ? 'bg-yellow-400 text-black font-semibold min-w-[140px]'
-                                : 'bg-blue-600 text-white font-semibold hover:bg-blue-700 min-w-[140px]'
+                                ? 'bg-yellow-400 text-black font-semibold w-full sm:w-auto min-h-[44px]'
+                                : 'bg-blue-600 text-white font-semibold hover:bg-blue-700 w-full sm:w-auto min-h-[44px]'
                     }
                     onClick={
                         !isProfileComplete ? handleBlockedAction : handleSave
@@ -246,8 +249,14 @@ const Job = ({ job, showSavedBadge = true, forceApplied = false, forceCheckAppli
                 >
                     {isSaved ? 'Saved' : saving ? 'Saving...' : 'Save For Later'}
                 </Button>
-                <Button onClick={handleShare} variant="outline" className="flex items-center gap-1 border-blue-200 text-blue-600 hover:bg-blue-50">
-                    <Share2 className="w-4 h-4" /> Share
+                
+                <Button 
+                    onClick={handleShare} 
+                    variant="outline" 
+                    className="flex items-center gap-1 border-blue-200 text-blue-600 hover:bg-blue-50 w-full sm:w-auto min-h-[44px]"
+                >
+                    <Share2 className="w-4 h-4" /> 
+                    <span className="hidden sm:inline">Share</span>
                 </Button>
             </div>
         </div>

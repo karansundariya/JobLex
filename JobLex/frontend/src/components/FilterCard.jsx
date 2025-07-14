@@ -52,38 +52,60 @@ const FilterCard = () => {
     };
 
     return (
-        <div className='w-full bg-white p-3 rounded-md'>
-            <h1 className='font-bold text-lg'>Filter Jobs</h1>
-            <hr className='mt-3' />
-            {filterData.map((data, index) => (
-                <div key={data.filterType}>
-                    <h1 className='font-bold text-lg'>{data.label}</h1>
-                    <RadioGroup value={filters[data.filterType]}>
-                        {data.array.map((item, idx) => {
-                            const itemId = `id${index}-${idx}`;
-                            return (
-                                <div className='flex items-center space-x-2 my-2' key={itemId}>
-                                    <RadioGroupItem
-                                        value={item}
-                                        id={itemId}
-                                        checked={filters[data.filterType] === item}
-                                        onClick={() => toggleHandler(data.filterType, item)}
-                                        readOnly
-                                    />
-                                    <Label htmlFor={itemId}>{item}</Label>
-                                </div>
-                            );
-                        })}
-                    </RadioGroup>
-                </div>
-            ))}
-            <Button
-                variant="outline"
-                className="mt-2"
-                onClick={clearAll}
-            >
-                Clear All
-            </Button>
+        <div className='w-full bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100'>
+            <div className='flex items-center justify-between mb-4'>
+                <h1 className='font-bold text-lg sm:text-xl'>Filter Jobs</h1>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearAll}
+                    className="text-sm px-3 py-1"
+                >
+                    Clear All
+                </Button>
+            </div>
+            
+            <div className='space-y-6'>
+                {filterData.map((data, index) => (
+                    <div key={data.filterType} className='border-b border-gray-100 pb-4 last:border-b-0'>
+                        <h2 className='font-semibold text-base sm:text-lg mb-3 text-gray-800'>{data.label}</h2>
+                        <RadioGroup value={filters[data.filterType]} className='space-y-2'>
+                            {data.array.map((item, idx) => {
+                                const itemId = `id${index}-${idx}`;
+                                return (
+                                    <div className='flex items-center space-x-3' key={itemId}>
+                                        <RadioGroupItem
+                                            value={item}
+                                            id={itemId}
+                                            checked={filters[data.filterType] === item}
+                                            onClick={() => toggleHandler(data.filterType, item)}
+                                            readOnly
+                                            className='w-5 h-5'
+                                        />
+                                        <Label 
+                                            htmlFor={itemId} 
+                                            className='text-sm sm:text-base cursor-pointer flex-1 py-2 hover:text-blue-600 transition-colors'
+                                        >
+                                            {item}
+                                        </Label>
+                                    </div>
+                                );
+                            })}
+                        </RadioGroup>
+                    </div>
+                ))}
+            </div>
+            
+            {/* Mobile-friendly action buttons */}
+            <div className='mt-6 pt-4 border-t border-gray-100'>
+                <Button
+                    variant="outline"
+                    onClick={clearAll}
+                    className="w-full py-3 text-base font-medium"
+                >
+                    Clear All Filters
+                </Button>
+            </div>
         </div>
     );
 }

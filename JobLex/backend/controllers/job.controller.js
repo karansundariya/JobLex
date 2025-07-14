@@ -2,17 +2,18 @@ const { Job } = require("../models/job.model.js");
 const { User } = require("../models/user.model.js");
 const sendEmail = require("../utils/email.js");
 const { Company } = require("../models/company.model.js");
-const { setImmediate } = require('timers');
 
 // Job controller logic updated
 
 // admin post krega job
 const postJob = async (req, res) => {
     try {
+        console.log("postJob controller called");
         const { title, description, requirements, salary, location, jobType, experience, position, companyId, applicationType, careerPageUrl, expiryDate, status } = req.body;
         const userId = req.id;
 
         if (!title || !description || !requirements || !location || !jobType || !experience || !companyId || !applicationType) {
+            console.log("Missing required fields");
             return res.status(400).json({
                 message: "Something is missing.",
                 success: false
@@ -21,6 +22,7 @@ const postJob = async (req, res) => {
 
         // Validate careerPageUrl for external applications
         if (applicationType === 'external' && !careerPageUrl) {
+            console.log("Missing careerPageUrl for external application");
             return res.status(400).json({
                 message: "Career page URL is required for external applications.",
                 success: false
@@ -51,6 +53,7 @@ const postJob = async (req, res) => {
             expiryDate: expiry,
             status: jobStatus
         });
+        console.log("Job created:", job.title);
 
         // Fetch company details for email
         const company = await Company.findById(companyId);
@@ -58,31 +61,44 @@ const postJob = async (req, res) => {
         const companyLocation = company && company.location ? company.location : location;
 
         // Notify users tracking keywords
-        const keywordRegex = new RegExp(job.title + '|' + job.description, 'i');
         const usersToNotify = await User.find({ trackedKeywords: { $exists: true, $ne: [] } });
+        console.log("Users to notify:", usersToNotify.length);
+        for (const user of usersToNotify) {
+            console.log("Checking user:", user.email, user.trackedKeywords);
+            const jobWords = (job.title + ' ' + job.description).toLowerCase().split(/\W+/);
+            console.log("Job words:", jobWords);
+            const matchedKeywords = user.trackedKeywords.filter(keyword => {
+                const kw = keyword.toLowerCase();
+                console.log("Checking keyword:", kw, "in jobWords:", jobWords);
+                return jobWords.includes(kw);
+            });
+            console.log("Matched keywords for user", user.email, ":", matchedKeywords);
+            if (matchedKeywords.length > 0) {
+                console.log(`Sending job alert to ${user.email} for keywords: ${matchedKeywords.join(', ')}`);
+                try {
+                    await sendEmail(
+                        user.email,
+                        `New Job Alert: ${job.title}`,
+                        `A new job matching your interest ('${matchedKeywords.join(", ")}') has been posted: ${job.title}\n\nCompany: ${companyName}\nLocation: ${companyLocation}\nDescription: ${job.description}\n\nVisit the portal to apply!`
+                    );
+                    console.log("Email sent to:", user.email);
+                } catch (e) {
+                    console.error(`Failed to send job alert to ${user.email}:`, e);
+                }
+            }
+        }
 
         return res.status(201).json({
             message: "New job created successfully.",
             job,
             success: true
         });
-
-        // Send emails in the background
-        setImmediate(async () => {
-            for (const user of usersToNotify) {
-                if (user.trackedKeywords.some(keyword => job.title.toLowerCase().includes(keyword.toLowerCase()) || job.description.toLowerCase().includes(keyword.toLowerCase()))) {
-                    try {
-                        await sendEmail(
-                            user.email,
-                            `New Job Alert: ${job.title}`,
-                            `Hi ${user.fullname || 'there'},\n\nA new job matching your interest ('${user.trackedKeywords.join(", ")}') has been posted!\n\nJob Title: ${job.title}\nCompany: ${companyName}\nLocation: ${companyLocation}\nDescription: ${job.description}\n\nView & Apply: https://joblex-vo9q.onrender.com/description/${job._id}\n\nBest of luck!\nTeam JobLex`
-                        );
-                    } catch (e) { /* ignore email errors */ }
-                }
-            }
-        });
     } catch (error) {
-        console.log(error);
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
     }
 };
 

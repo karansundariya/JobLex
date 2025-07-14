@@ -70,7 +70,11 @@ const register = async (req, res) => {
             success: true
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
     }
 };
 
@@ -127,7 +131,11 @@ const login = async (req, res) => {
             success: true
         })
     } catch (error) {
-        console.log(error);
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
     }
 }
 
@@ -138,7 +146,11 @@ const logout = async (req, res) => {
             success: true
         })
     } catch (error) {
-        console.log(error);
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
     }
 }
 
@@ -221,7 +233,11 @@ const updateProfile = async (req, res) => {
             success:true
         })
     } catch (error) {
-        console.log(error);
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
     }
 }
 
@@ -255,7 +271,7 @@ const markJobAsApplied = async (req, res) => {
             success: true
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({
             message: "Internal server error",
             success: false
@@ -289,7 +305,7 @@ const checkJobApplied = async (req, res) => {
             success: true
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({
             message: "Internal server error",
             success: false
@@ -313,7 +329,7 @@ const saveJob = async (req, res) => {
         await user.save();
         return res.status(200).json({ message: 'Job saved for later', success: true });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: 'Internal server error', success: false });
     }
 };
@@ -328,7 +344,7 @@ const getSavedJobs = async (req, res) => {
         }
         return res.status(200).json({ jobs: user.savedJobs, success: true });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: 'Internal server error', success: false });
     }
 };
@@ -346,7 +362,7 @@ const unsaveJob = async (req, res) => {
         await user.save();
         return res.status(200).json({ message: 'Job removed from saved', success: true });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: 'Internal server error', success: false });
     }
 };
@@ -370,7 +386,7 @@ const addTrackedKeyword = async (req, res) => {
         await user.save();
         return res.status(200).json({ message: 'Keyword added', trackedKeywords: user.trackedKeywords, success: true });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: 'Internal server error', success: false });
     }
 };
@@ -391,7 +407,7 @@ const removeTrackedKeyword = async (req, res) => {
         await user.save();
         return res.status(200).json({ message: 'Keyword removed', trackedKeywords: user.trackedKeywords, success: true });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: 'Internal server error', success: false });
     }
 };
@@ -417,7 +433,7 @@ const getProfile = async (req, res) => {
             success: true
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: 'Internal server error', success: false });
     }
 };

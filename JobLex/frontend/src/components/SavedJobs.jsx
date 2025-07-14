@@ -7,6 +7,7 @@ import Navbar from './shared/Navbar';
 import { JobCard } from './Job';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
+import { Trash2 } from 'lucide-react';
 
 const SavedJobs = () => {
     const dispatch = useDispatch();
@@ -75,24 +76,43 @@ const SavedJobs = () => {
     return (
         <div>
             <Navbar />
-            <div className='max-w-7xl mx-auto mt-8'>
-                <h1 className='text-2xl font-bold mb-2'>Saved Jobs</h1>
-                <p className='mb-4 text-gray-700'>You have saved {jobs.length} job{jobs.length !== 1 ? 's' : ''}.</p>
+            <div className='max-w-7xl mx-auto mt-6 sm:mt-8 px-4'>
+                <div className='mb-6'>
+                    <h1 className='text-xl sm:text-2xl font-bold mb-2'>Saved Jobs</h1>
+                    <p className='mb-4 text-gray-700 text-sm sm:text-base'>
+                        You have saved {jobs.length} job{jobs.length !== 1 ? 's' : ''}.
+                    </p>
+                </div>
+                
                 {jobs.length === 0 ? (
-                    <div className='text-gray-500'>No saved jobs found.</div>
+                    <div className='text-center py-12'>
+                        <div className='text-gray-500 text-lg font-medium mb-4'>
+                            No saved jobs found.
+                        </div>
+                        <p className='text-gray-400 text-sm'>
+                            Save jobs to see them here.
+                        </p>
+                    </div>
                 ) : (
-                    <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4'>
+                    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6'>
                         {jobs.map(job => (
                             <div key={job._id + '-' + (user?._id || '')} className="relative">
                                 <JobCard job={job} showSavedBadge={false} forceApplied={appliedMap[job._id]} />
                                 <Button
                                     variant="destructive"
                                     size="sm"
-                                    className="absolute top-2 right-2"
+                                    className="absolute top-2 right-2 z-10 min-h-[32px] px-2 sm:px-3 text-xs sm:text-sm"
                                     onClick={() => handleUnsave(job._id)}
                                     disabled={unsaving === job._id}
                                 >
-                                    {unsaving === job._id ? 'Removing...' : 'Unsave'}
+                                    {unsaving === job._id ? (
+                                        'Removing...'
+                                    ) : (
+                                        <>
+                                            <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                                            <span className="hidden sm:inline">Unsave</span>
+                                        </>
+                                    )}
                                 </Button>
                             </div>
                         ))}
